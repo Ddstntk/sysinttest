@@ -5,6 +5,8 @@
 namespace Repository;
 
 use Doctrine\DBAL\Connection;
+use Silex\Application;
+use Silex\Api\ControllerProviderInterface;
 
 /**
  * Class TagsRepository.

@@ -2,8 +2,8 @@
 /**
  * Bookmarks.
  *
- * @link http://epi.chojna.info.pl
- * @author EPI UJ <epi@uj.edu.pl>
+ * @link      http://epi.chojna.info.pl
+ * @author    EPI UJ <epi@uj.edu.pl>
  * @copyright (c) 2017
  */
 namespace Model;

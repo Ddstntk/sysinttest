@@ -25,11 +25,13 @@ $app->register(
 );
 
 $app->register(new HttpFragmentServiceProvider());
-$app['twig'] = $app->extend('twig', function ($twig, $app) {
-    // add custom globals, filters, tags, ...
+$app['twig'] = $app->extend(
+    'twig', function ($twig, $app) {
+        // add custom globals, filters, tags, ...
 
-    return $twig;
-});
+        return $twig;
+    }
+);
 
 /**
  * TŁUMACZENIA
@@ -42,14 +44,16 @@ $app->register(
         'locale_fallbacks' => array('en'),
     ]
 );
-$app->extend('translator', function ($translator, $app) {
-    $translator->addResource('xliff', __DIR__.'/../translations/messages.en.xlf', 'en', 'messages');
-    $translator->addResource('xliff', __DIR__.'/../translations/validators.en.xlf', 'en', 'validators');
-    $translator->addResource('xliff', __DIR__.'/../translations/messages.pl.xlf', 'pl', 'messages');
-    $translator->addResource('xliff', __DIR__.'/../translations/validators.pl.xlf', 'pl', 'validators');
+$app->extend(
+    'translator', function ($translator, $app) {
+        $translator->addResource('xliff', __DIR__.'/../translations/messages.en.xlf', 'en', 'messages');
+        $translator->addResource('xliff', __DIR__.'/../translations/validators.en.xlf', 'en', 'validators');
+        $translator->addResource('xliff', __DIR__.'/../translations/messages.pl.xlf', 'pl', 'messages');
+        $translator->addResource('xliff', __DIR__.'/../translations/validators.pl.xlf', 'pl', 'validators');
 
-    return $translator;
-});
+        return $translator;
+    }
+);
 
 /**
  * BAZA DANYCH
