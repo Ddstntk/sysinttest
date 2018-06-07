@@ -5,8 +5,6 @@
 namespace Repository;
 
 use Doctrine\DBAL\Connection;
-use Silex\Application;
-use Silex\Api\ControllerProviderInterface;
 
 /**
  * Class TagsRepository.
@@ -37,9 +35,8 @@ class TagsRepository
      */
     public function findAll()
     {
-        $queryBuilder = $this->queryAll();
-
-        return $queryBuilder->execute()->fetchAll();
+        $query = 'SELECT `id`, `name` FROM `si_tags`';
+        return $this->db->fetchAll($query);
     }
 
     /**
@@ -51,24 +48,12 @@ class TagsRepository
      */
     public function findOneById($id)
     {
-        $queryBuilder = $this->queryAll();
-        $queryBuilder->where('t.id = :id')
-            ->setParameter(':id', $id, \PDO::PARAM_INT);
-        $result = $queryBuilder->execute()->fetch();
+        $query = 'SELECT `id`, `name` FROM `tags` WHERE id= :id';
+        $statement = $this->db->prepare($query);
+        $statement->bindValue('id', $id, \PDO::PARAM_INT);
+        $statement->execute();
+        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
-        return !$result ? [] : $result;
-    }
-
-    /**
-     * Query all records.
-     *
-     * @return \Doctrine\DBAL\Query\QueryBuilder Result
-     */
-    protected function queryAll()
-    {
-        $queryBuilder = $this->db->createQueryBuilder();
-
-        return $queryBuilder->select('t.id', 't.name')
-            ->from('si_tags', 't');
+        return !$result ? [] : current($result);
     }
 }
