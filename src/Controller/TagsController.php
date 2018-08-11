@@ -96,7 +96,12 @@ class TagsController implements ControllerProviderInterface
     {
         $tag = [];
 
-        $form = $app['form.factory']->createBuilder(TagType::class, $tag)->getForm();
+        $form = $app['form.factory']->createBuilder(
+        TagType::class,
+        $tag,
+        ['tags_repository' => new TagsRepository($app['db'])]
+        )->getForm();
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -149,7 +154,12 @@ class TagsController implements ControllerProviderInterface
             return $app->redirect($app['url_generator']->generate('tags_index'));
         }
 
-        $form = $app['form.factory']->createBuilder(TagType::class, $tag)->getForm();
+        $form = $app['form.factory']->createBuilder(
+            TagType::class,
+            $tag,
+            ['tags_repository' => new TagsRepository($app['db'])]
+        )->getForm();
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

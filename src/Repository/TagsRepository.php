@@ -119,6 +119,27 @@ class TagsRepository
     }
 
     /**
+     * Find for uniqueness.
+     *
+     * @param string          $name Element name
+     * @param int|string|null $id   Element id
+     *
+     * @return array Result
+     */
+    public function findForUniqueness($name, $id = null)
+    {
+        $queryBuilder = $this->queryAll();
+        $queryBuilder->where('t.name = :name')
+            ->setParameter(':name', $name, \PDO::PARAM_STR);
+        if ($id) {
+            $queryBuilder->andWhere('t.id <> :id')
+                ->setParameter(':id', $id, \PDO::PARAM_INT);
+        }
+
+        return $queryBuilder->execute()->fetchAll();
+    }
+
+    /**
      * Query all records.
      *
      * @return \Doctrine\DBAL\Query\QueryBuilder Result
