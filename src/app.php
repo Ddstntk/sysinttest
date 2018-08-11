@@ -9,6 +9,10 @@ use Silex\Provider\LocaleServiceProvider;
 use Silex\Provider\TranslationServiceProvider;
 use Silex\Provider\DoctrineServiceProvider;
 use Sorien\Provider\DoctrineProfilerServiceProvider;
+use Silex\Provider\FormServiceProvider;
+use Silex\Provider\ValidatorServiceProvider;
+use Silex\Provider\SessionServiceProvider;
+
 
 $app = new Application();
 $app->register(new ServiceControllerServiceProvider());
@@ -26,7 +30,8 @@ $app->register(
 
 $app->register(new HttpFragmentServiceProvider());
 $app['twig'] = $app->extend(
-    'twig', function ($twig, $app) {
+    'twig',
+    function ($twig, $app) {
         // add custom globals, filters, tags, ...
 
         return $twig;
@@ -45,7 +50,8 @@ $app->register(
     ]
 );
 $app->extend(
-    'translator', function ($translator, $app) {
+    'translator',
+    function ($translator, $app) {
         $translator->addResource('xliff', __DIR__.'/../translations/messages.en.xlf', 'en', 'messages');
         $translator->addResource('xliff', __DIR__.'/../translations/validators.en.xlf', 'en', 'validators');
         $translator->addResource('xliff', __DIR__.'/../translations/messages.pl.xlf', 'pl', 'messages');
@@ -74,4 +80,10 @@ $app->register(
         ],
     ]
 );
+
+$app->register(new FormServiceProvider());
+$app->register(new ValidatorServiceProvider());
+
+$app->register(new SessionServiceProvider());
+
 return $app;

@@ -1,10 +1,28 @@
-<h1>View Bookmark</h1>
-{% if tags is defined and tags|length %}
-    <div>
-        {{ tags.title }}, {{ tags.url }}
-    </div>
-{% else %}
-    <div>
-        No bookmark found!
-    </div>
-{% endif %}
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Tags
+{% endblock %}
+
+{% block body %}
+    {% include 'default/_paginator.html.twig' with {
+        paginator: paginator,
+        route_name: 'tags_index_paginated',
+    } %}
+
+    <h1>
+        Tags
+    </h1>
+
+    {% if paginator.data is defined and paginator.data|length %}
+        <ul>
+            {% for row in paginator.data %}
+                <li>{{ row.id }}, {{ row.name }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div>
+            List is empty!
+        </div>
+    {% endif %}
+{% endblock %}

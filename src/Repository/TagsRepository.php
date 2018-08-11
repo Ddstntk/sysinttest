@@ -5,12 +5,20 @@
 namespace Repository;
 
 use Doctrine\DBAL\Connection;
+use Utils\Paginator;
 
 /**
  * Class TagsRepository.
  */
 class TagsRepository
 {
+    /**
+     * Number of items per page.
+     *
+     * const int NUM_ITEMS
+     */
+    const NUM_ITEMS = 1;
+
     /**
      * Doctrine DBAL connection.
      *
@@ -35,8 +43,29 @@ class TagsRepository
      */
     public function findAll()
     {
-        $query = 'SELECT `id`, `name` FROM `si_tags`';
-        return $this->db->fetchAll($query);
+        $queryBuilder = $this->queryAll();
+
+        return $queryBuilder->execute()->fetchAll();
+    }
+
+    /**
+     * Get records paginated.
+     *
+     * @param int $page Current page number
+     *
+     * @return array Result
+     */
+    public function findAllPaginated($page = 1)
+    {
+        $countQueryBuilder = $this->queryAll()
+            ->select('COUNT(DISTINCT t.id) AS total_results')
+            ->setMaxResults(1);
+
+        $paginator = new Paginator($this->queryAll(), $countQueryBuilder);
+        $paginator->setCurrentPage($page);
+        $paginator->setMaxPerPage(static::NUM_ITEMS);
+
+        return $paginator->getCurrentPageResults();
     }
 
     /**
@@ -48,12 +77,57 @@ class TagsRepository
      */
     public function findOneById($id)
     {
-        $query = 'SELECT `id`, `name` FROM `tags` WHERE id= :id';
-        $statement = $this->db->prepare($query);
-        $statement->bindValue('id', $id, \PDO::PARAM_INT);
-        $statement->execute();
-        $result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $queryBuilder = $this->queryAll();
+        $queryBuilder->where('t.id = :id')
+            ->setParameter(':id', $id, \PDO::PARAM_INT);
+        $result = $queryBuilder->execute()->fetch();
 
-        return !$result ? [] : current($result);
+        return !$result ? [] : $result;
+    }
+
+    /**
+     * Save record.
+     *
+     * @param array $tag Tag
+     *
+     * @return boolean Result
+     */
+    public function save($tag)
+    {
+        if (isset($tag['id']) && ctype_digit((string) $tag['id'])) {
+            // update record
+            $id = $tag['id'];
+            unset($tag['id']);
+
+            return $this->db->update('si_tags', $tag, ['id' => $id]);
+        } else {
+            // add new record
+            return $this->db->insert('si_tags', $tag);
+        }
+    }
+
+    /**
+     * Remove record.
+     *
+     * @param array $tag Tag
+     *
+     * @return boolean Result
+     */
+    public function delete($tag)
+    {
+        return $this->db->delete('si_tags', ['id' => $tag['id']]);
+    }
+
+    /**
+     * Query all records.
+     *
+     * @return \Doctrine\DBAL\Query\QueryBuilder Result
+     */
+    protected function queryAll()
+    {
+        $queryBuilder = $this->db->createQueryBuilder();
+
+        return $queryBuilder->select('t.id', 't.name')
+            ->from('si_tags', 't');
     }
 }
