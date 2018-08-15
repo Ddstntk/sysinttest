@@ -27,15 +27,6 @@ class BookmarksRepository
      */
     protected $db;
 
-    /**
-     * BookmarksRepository constructor.
-     *
-     * @param \Doctrine\DBAL\Connection $db
-     */
-    public function __construct(Connection $db)
-    {
-        $this->db = $db;
-    }
 
     /**
      * Fetch all records.
@@ -84,8 +75,7 @@ class BookmarksRepository
         $result = $queryBuilder->execute()->fetch();
 
         if ($result) {
-            // TODO: remove current() after multi select implementation
-            $result['tags'] = current($this->findLinkedTagsIds($result['id']));
+            $result['tags'] = $this->findLinkedTags($result['id']);
         }
 
         return $result;
@@ -105,8 +95,8 @@ class BookmarksRepository
         try {
             $currentDateTime = new \DateTime();
             $bookmark['modified_at'] = $currentDateTime->format('Y-m-d H:i:s');
-            $tagsIds = isset($bookmark['tags']) ? $bookmark['tags'] : [];
-            unset($bookmark['tags']);
+            $tagsIds = isset($bookmark['tags']) ? array_column($bookmark['tags'], 'id') : [];
+            unset($bookmark['bookmarks']);
 
             if (isset($bookmark['id']) && ctype_digit((string) $bookmark['id'])) {
                 // update record
@@ -160,11 +150,11 @@ class BookmarksRepository
      *
      * @return array Result
      */
-    protected function findLinkedTagsIds($bookmarkId)
+    protected function findLinkedBookmarksIds($bookmarkId)
     {
         $queryBuilder = $this->db->createQueryBuilder()
-            ->select('bt.tag_id')
-            ->from('si_bookmarks_tags', 'bt')
+            ->select('bt.bookmark_id')
+            ->from('si_bookmarks', 'bt')
             ->where('bt.bookmark_id = :bookmark_id')
             ->setParameter(':bookmark_id', $bookmarkId, \PDO::PARAM_INT);
         $result = $queryBuilder->execute()->fetchAll();
@@ -187,8 +177,8 @@ class BookmarksRepository
     /**
      * Add linked tags.
      *
-     * @param int $bookmarkId Bookmark Id
-     * @param array $tagsIds Tags Ids
+     * @param int   $bookmarkId Bookmark Id
+     * @param array $tagsIds    Tags Ids
      */
     protected function addLinkedTags($bookmarkId, $tagsIds)
     {
@@ -207,6 +197,39 @@ class BookmarksRepository
         }
     }
 
+    /**
+     * Tags repository.
+     *
+     * @var null|\Repository\TagsRepository $tagsRepository
+     */
+    protected $tagsRepository = null;
+
+    /**
+     * BookmarksRepository constructor.
+     *
+     * @param \Doctrine\DBAL\Connection $db
+     */
+    public function __construct(Connection $db)
+    {
+        $this->db = $db;
+        $this->tagsRepository = new TagsRepository($db);
+    }
+
+    /**
+     * Find linked tags.
+     *
+     * @param int $bookmarkId Bookmark Id
+     *
+     * @return array Result
+     */
+    public function findLinkedTags($bookmarkId)
+    {
+        $tagsIds = $this->findLinkedTagsIds($bookmarkId);
+
+        return is_array($tagsIds)
+            ? $this->tagsRepository->findById($tagsIds)
+            : [];
+    }
     /**
      * Query all records.
      *

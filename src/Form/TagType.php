@@ -11,7 +11,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 use Validator\Constraints as CustomAssert;
 
-
 /**
  * Class TagType.
  */
@@ -76,4 +75,3 @@ class TagType extends AbstractType
         return 'tag_type';
     }
 }
-

@@ -45,6 +45,7 @@ class TagsController implements ControllerProviderInterface
             ->method('GET|POST')
             ->assert('id', '[1-9]\d*')
             ->bind('tags_delete');
+
         return $controller;
     }
 
@@ -97,9 +98,9 @@ class TagsController implements ControllerProviderInterface
         $tag = [];
 
         $form = $app['form.factory']->createBuilder(
-        TagType::class,
-        $tag,
-        ['tags_repository' => new TagsRepository($app['db'])]
+            TagType::class,
+            $tag,
+            ['tags_repository' => new TagsRepository($app['db'])]
         )->getForm();
 
         $form->handleRequest($request);
